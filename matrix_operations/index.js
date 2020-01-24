@@ -11,52 +11,51 @@ let matrixContainer = document.getElementById('show-matrices-container'); // Cal
 let matrixCount; // Holds the count for amount of matrices which will be used
 let matrixHolder = {}; // This will hold the actual matrix 2D arrays with values
 
+/******************************** METHODS *************************************/
+let newElement=(elementType, appendagee, attributes, text)=>{
+    // Appendagee is the parent element it will be attached to
+    // {attributes} will be an object where the attributes can be placed and will be looped through
+    let element = document.createElement(elementType);
+
+    Object.keys(attributes).forEach(key => {
+        // Add the attributes
+        element.setAttribute(key, attributes[key]);
+    });
+
+    if(text){
+        // If there is text then add it to the element
+        element.textContent = text;
+    }
+    // Add the element to the parent
+    appendagee.appendChild(element);
+}
+
+/***************************** EVENT LISTENERS ********************************/
+
 matrixCountButton.addEventListener('click',()=>{
     matrixAmountInput.style.display = 'none'; // Remove the amount inputs
     // When user submits matrix count, print out that number of inputs for the matrix sizes
     matrixCount = document.getElementById('matrix-count').value;
 
     // Add paragraph so user knows what to input (size of matrices)
-    let paragraph   = document.createElement('p');
-    paragraph.textContent = 'How big will the matrices be?'
-    matrixSizeInputContainer.appendChild(paragraph);
+    newElement('p', matrixSizeInputContainer, {},'How big will the matrices be?');
 
     // Create the inputs for the sizes of matrices
     for(let i = 0;i<matrixCount;i++){
         // Add the matrix number header
-        let matrixHeader = document.createElement('h4');
-        matrixHeader.textContent = 'Matrix '+i;
-        matrixSizeInputContainer.appendChild(matrixHeader);
-
+        newElement('h4', matrixSizeInputContainer, {}, 'Matrix ' + i);
+      
         // Title to denote the row input
-        let rowSpan = document.createElement('span');
-        rowSpan.textContent = "Rows: ";
+        newElement('span', matrixSizeInputContainer, {}, "Rows: ")
+        newElement('input', matrixSizeInputContainer,{ id: 'matrix-' + i + '-row-size', class: 'matrix-row' }, '');
 
         // Title to denote the column input
-        let colSpan = document.createElement('span');
-        colSpan.textContent = "Columns: ";
-        // Create the input elements
-        let newRowInput = document.createElement('input');
-        let newColInput = document.createElement('input');
-
-        // Set the class attribute of the input elements
-        newRowInput.setAttribute('id','matrix-'+i+'-row-size');
-        newRowInput.setAttribute('class','matrix-row');
-        newColInput.setAttribute('id','matrix-'+i+'-col-size');
-        newColInput.setAttribute('class','matrix-col');
-
-        // Append the inputs to the container
-        matrixSizeInputContainer.appendChild(rowSpan);
-        matrixSizeInputContainer.appendChild(newRowInput);
-        matrixSizeInputContainer.appendChild(colSpan);
-        matrixSizeInputContainer.appendChild(newColInput);
-
+        newElement('span', matrixSizeInputContainer, {}, "Columns: ")
+        newElement('input', matrixSizeInputContainer, { id: 'matrix-' + i + '-col-size', class: 'matrix-col' },'');
     }
+
     // Create the submit button for the matrix dimensions
-    let submitButton = document.createElement('input');
-    submitButton.setAttribute('type', 'submit');
-    submitButton.setAttribute('id', 'matrix-dimension-submit');
-    matrixSizeInputContainer.appendChild(submitButton);
+    newElement('input', matrixSizeInputContainer, {type: 'submit', id: 'matrix-dimension-submit'})
 
     createMatrices();
 });
@@ -66,9 +65,6 @@ let createMatrices =()=>{
      * Called in the event listener for the matrixCount, otherwise gives error 
      * because matrix-dimension-submit not created yet.
     */
-
-    
-     
     let matrixDimensionSubmit = document.getElementById('matrix-dimension-submit');
 
     matrixDimensionSubmit.addEventListener('click', () => {
@@ -186,8 +182,95 @@ let printMatrices=()=>{
         }
 
         matrixContainer.appendChild(newMatrixTable);
+
+    }
+    matrixCalculator();
+}
+
+
+let matrixCalculator=()=>{
+    // Get the container for the calculation input
+    let calculatorContainer = document.getElementById('matrix-calculator');
+
+    // Create input for user to put formula
+    let formulaInput = document.createElement('input');
+    formulaInput.setAttribute('id','formula');
+    formulaInput.setAttribute('type','text');
+
+    let formulatSubmit = document.createElement('input');
+    formulatSubmit.setAttribute('id','formula-submit');
+    formulatSubmit.setAttribute('type','submit');
+    formulatSubmit.setAttribute('value','Submit');
+
+    // Add the input and submit button to the container
+    calculatorContainer.appendChild(formulaInput);
+    calculatorContainer.appendChild(formulatSubmit);
+
+    
+
+    formulatSubmit.addEventListener('click',()=>{
+        let formula = formulaInput.value;
+        console.log(formula);
+        extractCalculation(formula);
+    })
+
+    
+}
+
+let extractCalculation=(formula)=>{
+    let matrixOne = formula.charAt(0);
+    let matrixTwo = formula.charAt(2);
+    let operator  = formula.charAt(1);
+
+    if(operator==='+'){
+        addMatrices(matrixOne, matrixTwo);
+    }else if(operator === '-'){
+        subtractMatrices(matrixOne, matrixTwo);
+    }else if(operator==='*'){
+        multiplyMatrices(matrixOne, matrixTwo);
     }
 }
+
+let addMatrices=(mtx1,mtx2)=>{
+    let newMtx = [];
+    if(mtx1.length===mtx2.length && mtx1[0].length===mtx2[0].length){
+        // Matrices must be the same size to add together
+        for(let row = 0; row<mtx1.length;row++){
+            let rowArray = [];
+            for (let col = 0; col < mtx1.length; col++) {
+                // Add each value together at the individual column
+                rowArray.push(mtx1[row][col]+mtx2[row][col]);
+            }
+            // Add the new row to the array
+            newMtx.push(rowArray);
+        }
+    }
+}
+
+let subtractMatrices = (mtx1, mtx2) => {
+    let newMtx = [];
+    if (mtx1.length === mtx2.length && mtx1[0].length === mtx2[0].length) {
+        // Matrices must be the same size to add together
+        for (let row = 0; row < mtx1.length; row++) {
+            let rowArray = [];
+            for (let col = 0; col < mtx1.length; col++) {
+                // Add each value together at the individual column
+                rowArray.push(mtx1[row][col] - mtx2[row][col]);
+            }
+            // Add the new row to the array
+            newMtx.push(rowArray);
+        }
+    }
+}
+
+let transpose=(mtx)=>{
+    
+}
+
+let trace=(mtx)=>{
+
+}
+
 
 
 
