@@ -14,26 +14,19 @@ let matrixHolder = {}; // This will hold the actual matrix 2D arrays with values
 /******************************** METHODS *************************************/
 let newElement=(elementType, appendagee, attributes, text)=>{
     // Appendagee is the parent element it will be attached to
-    // {attributes} will be an object where the attributes can be placed and will be looped through
     let element = document.createElement(elementType);
-
-    Object.keys(attributes).forEach(key => {
-        // Add the attributes
-        element.setAttribute(key, attributes[key]);
-    });
-
-    if(text){
-        // If there is text then add it to the element
-        element.textContent = text;
-    }
-    // Add the element to the parent
-    appendagee.appendChild(element);
+    // Add the attributes, {attributes} will be an object where the attributes can be placed and will be looped through
+    Object.keys(attributes).forEach(key => { element.setAttribute(key, attributes[key]); });
+    if (text) element.textContent = text; // If there is text then add it to the element
+    if (appendagee) appendagee.appendChild(element);// Add the element to the parent
+    return element;
 }
 
 /***************************** EVENT LISTENERS ********************************/
 
 matrixCountButton.addEventListener('click',()=>{
     matrixAmountInput.style.display = 'none'; // Remove the amount inputs
+    matrixSizeInputContainer.classList.remove('inputs-container-hidden'); // Make it visible
     // When user submits matrix count, print out that number of inputs for the matrix sizes
     matrixCount = document.getElementById('matrix-count').value;
 
@@ -43,15 +36,20 @@ matrixCountButton.addEventListener('click',()=>{
     // Create the inputs for the sizes of matrices
     for(let i = 0;i<matrixCount;i++){
         // Add the matrix number header
-        newElement('h4', matrixSizeInputContainer, {}, 'Matrix ' + i);
-      
+        newElement('h2', matrixSizeInputContainer, {}, 'MATRIX ' + i);
+        
+        let matrixSizeBox = newElement('div',matrixSizeInputContainer,{id:'matrix-size-containers'})
         // Title to denote the row input
-        newElement('span', matrixSizeInputContainer, {}, "Rows: ")
-        newElement('input', matrixSizeInputContainer,{ id: 'matrix-' + i + '-row-size', class: 'matrix-row' }, '');
-
+        newElement('span', matrixSizeBox, {}, "Rows: ");
+        newElement('input', matrixSizeBox,{ id: 'matrix-' + i + '-row-size', class: 'matrix-row' }, '');
+        newElement('br', matrixSizeBox, {});
+        
         // Title to denote the column input
-        newElement('span', matrixSizeInputContainer, {}, "Columns: ")
-        newElement('input', matrixSizeInputContainer, { id: 'matrix-' + i + '-col-size', class: 'matrix-col' },'');
+        newElement('span', matrixSizeBox, {}, "Columns: ")
+        newElement('input', matrixSizeBox, { id: 'matrix-' + i + '-col-size', class: 'matrix-col' },'');
+        newElement('br', matrixSizeBox, {});
+       
+
     }
 
     // Create the submit button for the matrix dimensions
@@ -66,6 +64,7 @@ let createMatrices =()=>{
      * because matrix-dimension-submit not created yet.
     */
     let matrixDimensionSubmit = document.getElementById('matrix-dimension-submit');
+    
 
     matrixDimensionSubmit.addEventListener('click', () => {
         // When user submits the dimensions, create the inputs for the matrix arrays
@@ -79,44 +78,34 @@ let createMatrices =()=>{
             // matrixHolder[i] = new Array(rowCount).map(e => new Array(colCount));
 
             // Create container for individual matrix
-            let matrixDiv = document.createElement('div'); // Create div for matrix
-            matrixDiv.setAttribute('id','matrix-'+i); // Give matrix its number
-            matrixDiv.setAttribute('class','matrix-container');
-            matrixValInputContainer.appendChild(matrixDiv); // Add new matrix to container
+            newElement('h2', matrixValInputContainer, {}, 'MATRIX ' + i + ' VALUES');
 
+            let matrixDiv = newElement('div', matrixValInputContainer, { id: 'matrix-' + i, class: 'matrix matrix-container'});
             
             // Create the matrix of inputs
             for(let row =0; row<rowCount; row++){
-                let rowDiv = document.createElement('div');
-                rowDiv.setAttribute('class','row'); 
+                // Row for the matrix
+                let rowDiv = newElement('div','',{class:'row'})
+                
                 for (let col = 0; col < colCount; col++) {
-                    let inputElement = document.createElement('input');
-                    inputElement.setAttribute('class','row-'+row+" col-"+col);
-                    inputElement.setAttribute('id', 'matrix-'+i+'-row-'+row+"-col-"+col);
-
-                    let titleSpan = document.createElement('span');
-                    titleSpan.textContent = 'Row ' + row + ", Column " + col+": "
-                    rowDiv.appendChild(titleSpan)
-                    rowDiv.appendChild(inputElement);
+                    // Input label
+                    newElement('input', rowDiv, { class: 'row-' + row + " col-" + col,
+                                                  id: 'matrix-' + i + '-row-' + row + "-col-" + col})
                     matrixDiv.appendChild(rowDiv);
                 }
             }
         }
-        let matrixSubmitButton = document.createElement('input');
-        matrixSubmitButton.setAttribute('type','submit');
-        matrixSubmitButton.setAttribute('id','matrix-submit-button');
-        matrixValInputContainer.appendChild(matrixSubmitButton);
-
+        newElement('input', matrixValInputContainer, { type: 'submit', id: 'matrix-submit-button'})
+        matrixValInputContainer.classList.remove('inputs-container-hidden'); // Make container shown
         addValuesToArray();
-        matrixSizeInputContainer.style.display = 'none'; // Remove the size inputs
         
+        matrixSizeInputContainer.style.display = 'none'; // Remove the size inputs
     });
 };
 
 /****************** ADD VALUE USER INPUTS TO ARRAY  **********************/
 
 let addValuesToArray=(rowCount,colCount)=>{
-    
     // Add the user inputs to the array matrixHolder
     let submitButton = document.getElementById('matrix-submit-button');
 
@@ -155,34 +144,24 @@ let printMatrices=()=>{
     
     // Loop through matrixes and print them to the screen
     for (let mtx = 0; mtx < matrixCount; mtx++) {
-        // Loop through each matrix
-        let matrixHeader = document.createElement('h3');
-        matrixHeader.textContent = 'Matrix ' + mtx;
-        matrixContainer.appendChild(matrixHeader);
-
-        let newMatrixTable = document.createElement('table');
-        newMatrixTable.setAttribute('class','matrix');
+        let matrixBox = newElement('div',matrixContainer,{class:'matrix-calculator-box'})
+        newElement('h3', matrixBox, {}, 'Matrix ' + mtx); 
        
+
+        let newMatrixTable = newElement('table','',{class:'matrix'})
+        
         for (let row = 0; row < matrixHolder[mtx].length; row++) {
             // Loop through rows of matrix
-            let rowContainer = document.createElement('tr');
-            rowContainer.setAttribute('id','print-matrix-'+mtx+'-row-'+row);
-            rowContainer.setAttribute('class','matrix-print-row');
-            
+            let rowContainer = newElement('tr', '', { id: 'print-matrix-' + mtx + '-row-' + row, class: 'matrix-print-row'})
+
             for (let col = 0; col < matrixHolder[mtx][row].length; col++) {
                 // Loop through each column value in the matrix row
-                let newColumnVal = document.createElement('td');
-                newColumnVal.textContent = matrixHolder[mtx][row][col]; // Give value to td
-                rowContainer.appendChild(newColumnVal); // Add td to tr
-                console.log(matrixHolder[mtx][row][col]);
-
+                newElement('td', rowContainer, {}, matrixHolder[mtx][row][col])
             }
             // Append tr to table
             newMatrixTable.appendChild(rowContainer);
         }
-
-        matrixContainer.appendChild(newMatrixTable);
-
+        matrixBox.appendChild(newMatrixTable);
     }
     matrixCalculator();
 }
@@ -193,78 +172,138 @@ let matrixCalculator=()=>{
     let calculatorContainer = document.getElementById('matrix-calculator');
 
     // Create input for user to put formula
-    let formulaInput = document.createElement('input');
-    formulaInput.setAttribute('id','formula');
-    formulaInput.setAttribute('type','text');
+    let formulaInput = newElement('input',calculatorContainer,{id:'formula',type:'text'})
+    let formulaSubmit = newElement('input',calculatorContainer,{id:'formula-submit',type:'submit',value:'Submit'})
 
-    let formulatSubmit = document.createElement('input');
-    formulatSubmit.setAttribute('id','formula-submit');
-    formulatSubmit.setAttribute('type','submit');
-    formulatSubmit.setAttribute('value','Submit');
-
-    // Add the input and submit button to the container
-    calculatorContainer.appendChild(formulaInput);
-    calculatorContainer.appendChild(formulatSubmit);
-
-    
-
-    formulatSubmit.addEventListener('click',()=>{
+    formulaSubmit.addEventListener('click',()=>{
         let formula = formulaInput.value;
         console.log(formula);
         extractCalculation(formula);
-    })
-
-    
+    });
 }
 
 let extractCalculation=(formula)=>{
-    let matrixOne = formula.charAt(0);
-    let matrixTwo = formula.charAt(2);
+    let matrixOne = matrixHolder[formula.charAt(0)];
+    let matrixTwo;
+    if(formula.charAt(2)){
+        matrixTwo = matrixHolder[formula.charAt(2)];
+    }
     let operator  = formula.charAt(1);
 
     if(operator==='+'){
-        addMatrices(matrixOne, matrixTwo);
+        addMatrices(matrixOne, matrixTwo, 'Matrix (' + formula.charAt(0) + '+' + formula.charAt(2) + ")");
     }else if(operator === '-'){
-        subtractMatrices(matrixOne, matrixTwo);
+        subtractMatrices(matrixOne, matrixTwo, 'Matrix ('+formula.charAt(0) + '-' + formula.charAt(2)+")");
     }else if(operator==='*'){
-        multiplyMatrices(matrixOne, matrixTwo);
+        multiplyMatrices(matrixOne, matrixTwo, 'Matrix (' + formula.charAt(0) + '' + formula.charAt(2) + ")") ;
+    }else if(operator==='t'){
+        transpose(matrixOne, "tr(" + formula.charAt(0)+")");
     }
 }
 
-let addMatrices=(mtx1,mtx2)=>{
+let printMatrix = (mtx, text) => {
+    // Loop through matrixes and print them to the screen 
+    newElement('h3', matrixContainer, {}, text)
+
+    let newMatrixTable = newElement('table', '', { class: 'matrix' })
+
+    for (let row = 0; row < mtx.length; row++) {
+        // Loop through rows of matrix
+        let rowContainer = newElement('tr', '', { id: 'print-matrix-' + mtx + '-row-' + row, class: 'matrix-print-row' })
+
+        for (let col = 0; col < mtx[0].length; col++) {
+            // Loop through each column value in the matrix row
+            newElement('td', rowContainer, {}, mtx[row][col]+"")
+        }
+        // Append tr to table
+        newMatrixTable.appendChild(rowContainer);
+    }
+    matrixContainer.appendChild(newMatrixTable);
+}
+    
+
+
+let addMatrices=(mtx1,mtx2, text)=>{
     let newMtx = [];
     if(mtx1.length===mtx2.length && mtx1[0].length===mtx2[0].length){
         // Matrices must be the same size to add together
         for(let row = 0; row<mtx1.length;row++){
             let rowArray = [];
-            for (let col = 0; col < mtx1.length; col++) {
+            for (let col = 0; col < mtx1[0].length; col++) {
                 // Add each value together at the individual column
-                rowArray.push(mtx1[row][col]+mtx2[row][col]);
+                rowArray.push(parseInt(mtx1[row][col])+parseInt(mtx2[row][col]));
             }
             // Add the new row to the array
             newMtx.push(rowArray);
         }
+        console.log(newMtx);
+        printMatrix(newMtx,text)
     }
 }
 
-let subtractMatrices = (mtx1, mtx2) => {
+let subtractMatrices = (mtx1, mtx2, text) => {
     let newMtx = [];
+
     if (mtx1.length === mtx2.length && mtx1[0].length === mtx2[0].length) {
-        // Matrices must be the same size to add together
+       // Matrices must be the same size to add together
+        for (let row = 0; row < mtx1.length; row++) {
+            // Same amount of rows as in the first matrix
+            let rowArray = [];
+            for (let col = 0; col < mtx1[0].length; col++) {
+                // Add each value together at the individual column
+                rowArray.push(parseInt(mtx1[row][col]) - parseInt(mtx2[row][col]));
+            }
+            // Add the new row to the array
+            newMtx.push(rowArray);
+        }
+        console.log(newMtx);
+        printMatrix(newMtx,text)
+    }
+}
+
+let multiplyMatrices = (mtx1, mtx2, text) => {
+    let newMtx = [];
+    if (mtx1[0].length === mtx2.length) {
+         // Columns of the first matrix must match the amount of rows in the second
+        
         for (let row = 0; row < mtx1.length; row++) {
             let rowArray = [];
-            for (let col = 0; col < mtx1.length; col++) {
+            for (let col = 0; col < mtx1[0].length; col++) {
+                let total=0;
+                for(let mtx2row=0;mtx2row<mtx2.length;mtx2row++){
+                    // Multiply values in the row of the first matrix by those in the column of second and add them together
+                    total += (parseInt(mtx1[row][mtx2row])*parseInt(mtx2[mtx2row][col]));
+                    console.log(total);
+                }
                 // Add each value together at the individual column
-                rowArray.push(mtx1[row][col] - mtx2[row][col]);
+                rowArray.push(total);
             }
             // Add the new row to the array
             newMtx.push(rowArray);
         }
+        console.log(newMtx);
+        printMatrix(newMtx, text)
     }
 }
 
-let transpose=(mtx)=>{
-    
+let transpose=(mtx,text)=>{
+    // Type in the matrix number then 't' after (0t)
+    let newMtx = [];
+
+    // Matrices must be the same size to add together
+    for (let row = 0; row < mtx.length; row++) {       
+        for (let col = 0; col < mtx[0].length; col++) {
+            if(row ===0){
+                // create a new row to transpose the column val to the row
+                newMtx.push([])
+            }
+            // Push the value from the column to the row of same place
+            console.log
+            newMtx[col].push(parseInt(mtx[row][col]));
+        }
+    }
+    console.log(newMtx)
+    printMatrix(newMtx,text)
 }
 
 let trace=(mtx)=>{

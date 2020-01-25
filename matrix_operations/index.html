@@ -6,30 +6,41 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Linear Algebra</title>
     <link rel="stylesheet" href="index.css">
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css?family=VT323&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="matrix-calculator-header">
+        <h1>MATRIX CALCULATOR</h1>
+    </div>
     <div id="matrix-selection-container">
-        <div id="matrix-amount-input-container">
+
+        <div class="inputs-container" id="matrix-amount-input-container">
             <p>How many matrices?</p>
             <input type="number" id="matrix-count">
-            <input type="button" value="Submit" id="matrix-count-button">
+            <input type="submit" value="Submit" id="matrix-count-button">
         </div>
 
         <!-- Once they submit how many matrices, show inputs for each matrix 
             to ask how big (row x column) -->
-        <div id="matrix-size-input-container">
+        <div class="inputs-container inputs-container-hidden" id="matrix-size-input-container">
             <!-- This will hold the different matrix size inputs -->
           
         </div>
-        <div id="matrix-value-input-container">
-
+        <div class="inputs-container inputs-container-hidden" id="matrix-value-input-container">
+            <!-- Holds the row/column value inputs -->
         </div>
-        <div id="show-matrices-container">
-
+        <div id="matrix-calculator-container">
+            <div id="show-matrices-container">
+            
+            
+            </div>
+            <div id="matrix-calculator">
+            
+            </div>
         </div>
-        <div id="matrix-calculator">
 
-        </div>
+
 
     </div>
     <div id="matrix-holder">
