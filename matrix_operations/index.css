@@ -21,7 +21,7 @@ input{
     align-items: center;
 }
 .inputs-container-hidden{
-    display: none;
+    display: none !important;
 }
 .inputs-container{
 
@@ -78,6 +78,7 @@ input{
 #show-matrices-container{
     display: flex;
     justify-content: space-around;
+    flex-wrap: wrap;
 }
 .matrix-calculator-box{
     /* Actual matrices which have been created */
@@ -146,4 +147,14 @@ input[type="submit"]{
     background-color:rgb(17, 176, 128);
     padding: 2px;
     color:white;
+}
+
+/*************************** GAUSSIAN CALCULATOR *****************************/
+#gaussian-calculator{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 30px auto;
+
 }

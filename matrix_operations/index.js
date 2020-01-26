@@ -13,13 +13,15 @@ let matrixHolder = {}; // This will hold the actual matrix 2D arrays with values
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'; // Used to give the matrices letter labels
 
+let gaussianCalc = false; // This will determine whether to show the gaussian calculator or not
+
 /******************************** METHODS *************************************/
 let newElement=(elementType, appendagee, attributes, text)=>{
     // Appendagee is the parent element it will be attached to
     let element = document.createElement(elementType);
     // Add the attributes, {attributes} will be an object where the attributes can be placed and will be looped through
     Object.keys(attributes).forEach(key => { element.setAttribute(key, attributes[key]); });
-    if (text) element.textContent = text; // If there is text then add it to the element
+    if (text) element.innerHTML = text; // If there is text then add it to the element
     if (appendagee) appendagee.appendChild(element);// Add the element to the parent
     return element;
 }
@@ -197,20 +199,26 @@ let extractCalculation=(formula)=>{
     let operator  = formula.charAt(1);
 
     if(operator==='+'){
-        addMatrices(matrixOne, matrixTwo, 'MATRIX(' + formula.charAt(0) + '+' + formula.charAt(2) + ")");
+        addMatrices(matrixOne, matrixTwo, '(' + formula.charAt(0) + '+' + formula.charAt(2) + ")");
     }else if(operator === '-'){
-        subtractMatrices(matrixOne, matrixTwo, 'MATRIX('+formula.charAt(0) + '-' + formula.charAt(2)+")");
+        subtractMatrices(matrixOne, matrixTwo, '('+formula.charAt(0) + '-' + formula.charAt(2)+")");
     }else if(operator==='*'){
-        multiplyMatrices(matrixOne, matrixTwo, 'MATRIX(' + formula.charAt(0) + '' + formula.charAt(2) + ")") ;
+        multiplyMatrices(matrixOne, matrixTwo, '(' + formula.charAt(0) + '' + formula.charAt(2) + ")") ;
     }else if(operator==='t'){
-        transpose(matrixOne, "tr(" + formula.charAt(0)+")");
+        transpose(matrixOne, "(" + formula.charAt(0)+ALPHABET.charAt(19).toUpperCase().sup()+")");
+    } else if (operator === 't') {
+        transpose(matrixOne, "(" + formula.charAt(0) + ")");
+    }else if(operator === 'R'){
+        // This will mean you will be doing gaussian calculations
+        // AR will start the gaussian calculator on matrix A
+        gaussianCalculator(matrixOne);
     }
 }
 
-let printMatrix = (mtx, mtxCount, text) => {
+let printMatrix = (container, mtx, mtxCount, text) => {
     // Loop through matrixes and print them to the screen 
-    let matrixBox = newElement('div', matrixContainer, { class: 'matrix-calculator-box' })
-    newElement('h3', matrixBox, {}, text+" "+ALPHABET.charAt(mtxCount).toUpperCase())
+    let matrixBox = newElement('div', container, { class: 'matrix-calculator-box' })
+    newElement('h3', matrixBox, {}, "MATRIX "+ALPHABET.charAt(mtxCount).toUpperCase()+" "+text)
 
     let newMatrixTable = newElement('table', '', { class: 'matrix' })
 
@@ -247,7 +255,7 @@ let addMatrices=(mtx1,mtx2, text)=>{
         // Add the matrix to be used later
         matrixCount = parseInt(matrixCount)+1;
         matrixHolder[matrixCount-1] = newMtx;
-        printMatrix(newMtx,matrixCount-1,text);
+        printMatrix(matrixContainer,newMtx,matrixCount-1,text);
     }
     console.log(matrixHolder)
 }
@@ -271,7 +279,7 @@ let subtractMatrices = (mtx1, mtx2, text) => {
         // Add the matrix to be used later
         matrixCount = parseInt(matrixCount) + 1;
         matrixHolder[matrixCount - 1] = newMtx;
-        printMatrix(newMtx, matrixCount - 1, text);
+        printMatrix(matrixContainer,newMtx, matrixCount - 1, text);
         
     }
 }
@@ -300,7 +308,7 @@ let multiplyMatrices = (mtx1, mtx2, text) => {
         // Add the matrix to be used later
         matrixCount = parseInt(matrixCount) + 1;
         matrixHolder[matrixCount - 1] = newMtx;
-        printMatrix(newMtx, matrixCount - 1, text);
+        printMatrix(matrixContainer,newMtx, matrixCount - 1, text);
     }
 }
 
@@ -324,15 +332,80 @@ let transpose=(mtx,text)=>{
     // Add the matrix to be used later
     matrixCount = parseInt(matrixCount) + 1;
     matrixHolder[matrixCount - 1] = newMtx;
-    printMatrix(newMtx, matrixCount - 1, text);
+    printMatrix(matrixContainer,newMtx, matrixCount - 1, text);
 }
 
 let trace=(mtx)=>{
-
+    let total = 0;
+    if(mtx.length === mtx[0].length){
+        // Must be an nxn matrix
+        for(let i=0;i<mtx.length;i++){
+            // Add the eigenvalue to the totals
+            total+=mtx[i][i];
+        }
+    }
+    return total;
 }
 
+/****************************** GAUSSIAN CALCULATOR ****************************/
+let rowOperatedMatrix = []; // Array to save the matrices which have had row operations performed, as well as the operation
+
+let gaussianCalculator=(mtx)=>{
+    rowOperatedMatrix.push({original:mtx})
+    createGaussianCalculator(mtx);
+}
+
+let createGaussianCalculator=(mtx)=>{
+    /* Add the calculator to the DOM, remove the matrix calculator till finished */
+    
+    // Get the container for the calculation input
+    let gaussCalculatorContainer = document.getElementById('gaussian-calculator');
+    gaussCalculatorContainer.classList.remove('inputs-container-hidden');
+
+    // Remove the matrixCalculator from the DOM
+    let matrixCalculatorContainer = document.getElementById('matrix-calculator');
+    matrixCalculatorContainer.classList.add('inputs-container-hidden');
+
+    // Add Header
+    newElement('h1',gaussCalculatorContainer, {id:'gaussian-calculator-header'},'ENTER ROW OPERATIONS');
+
+    let rowOpContainer = newElement('div',gaussCalculatorContainer,{id:'row-operation-container'});
+    // Create input for user to put formula
+    let operationInput = newElement('input', rowOpContainer, { id: 'row-operation', type: 'text' })
+    let operationSubmit = newElement('input', rowOpContainer, { id: 'row-operation-submit', type: 'submit', value: 'SUBMIT' });
+
+    // Create button for user to click when done and wants to submit the matrix
+    let doneButton = newElement('input', gaussCalculatorContainer, { id: 'gaussian-matrix-submit', type: 'submit', value: 'DONE' })
+
+    operationSubmit.addEventListener('click', () => {
+        // When user clicks the submit button to perform row operation on the matrix
+        let operation = operationInput.value;
+        console.log(operation);
+        extractRowOperation(operation);
+    });
+
+    doneButton.addEventListener('click',()=>{
+        // When user done performing row operations, submit the matrix to the holder
+        // remove the gauss-calculator and show the matrix-calculator again
+        // Get the container for the calculation input
+        let gaussCalculatorContainer = document.getElementById('gaussian-calculator');
+        gaussCalculatorContainer.classList.add('inputs-container-hidden');
+
+        // Add the matrixCalculator from the DOM
+        let matrixCalculatorContainer = document.getElementById('matrix-calculator');
+        matrixCalculatorContainer.classList.remove('inputs-container-hidden');
+
+        // matrixCalculator();
+
+    })
+}
+
+let extractRowOperation=(operation)=>{
+    // Operation should be in the form 'R1=R1+R2'
+    console.log(operation);
 
 
+}
 
 
 
