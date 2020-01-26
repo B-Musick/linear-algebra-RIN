@@ -11,6 +11,8 @@ let matrixContainer = document.getElementById('show-matrices-container'); // Cal
 let matrixCount; // Holds the count for amount of matrices which will be used
 let matrixHolder = {}; // This will hold the actual matrix 2D arrays with values
 
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'; // Used to give the matrices letter labels
+
 /******************************** METHODS *************************************/
 let newElement=(elementType, appendagee, attributes, text)=>{
     // Appendagee is the parent element it will be attached to
@@ -36,7 +38,7 @@ matrixCountButton.addEventListener('click',()=>{
     // Create the inputs for the sizes of matrices
     for(let i = 0;i<matrixCount;i++){
         // Add the matrix number header
-        newElement('h2', matrixSizeInputContainer, {}, 'MATRIX ' + i);
+        newElement('h2', matrixSizeInputContainer, {}, 'MATRIX ' + ALPHABET.charAt(i).toUpperCase());
         
         let matrixSizeBox = newElement('div',matrixSizeInputContainer,{id:'matrix-size-containers'})
         // Title to denote the row input
@@ -78,7 +80,7 @@ let createMatrices =()=>{
             // matrixHolder[i] = new Array(rowCount).map(e => new Array(colCount));
 
             // Create container for individual matrix
-            newElement('h2', matrixValInputContainer, {}, 'MATRIX ' + i + ' VALUES');
+            newElement('h2', matrixValInputContainer, {}, 'MATRIX ' + ALPHABET.charAt(i).toUpperCase() + ' VALUES');
 
             let matrixDiv = newElement('div', matrixValInputContainer, { id: 'matrix-' + i, class: 'matrix matrix-container'});
             
@@ -95,11 +97,13 @@ let createMatrices =()=>{
                 }
             }
         }
-        newElement('input', matrixValInputContainer, { type: 'submit', id: 'matrix-submit-button'})
+        newElement('input', matrixValInputContainer, { type: 'submit', id: 'matrix-submit-button'});
+
         matrixValInputContainer.classList.remove('inputs-container-hidden'); // Make container shown
         addValuesToArray();
         
         matrixSizeInputContainer.style.display = 'none'; // Remove the size inputs
+
     });
 };
 
@@ -145,7 +149,7 @@ let printMatrices=()=>{
     // Loop through matrixes and print them to the screen
     for (let mtx = 0; mtx < matrixCount; mtx++) {
         let matrixBox = newElement('div',matrixContainer,{class:'matrix-calculator-box'})
-        newElement('h3', matrixBox, {}, 'Matrix ' + mtx); 
+        newElement('h3', matrixBox, {}, 'MATRIX ' + ALPHABET.charAt(mtx).toUpperCase()); 
        
 
         let newMatrixTable = newElement('table','',{class:'matrix'})
@@ -164,6 +168,8 @@ let printMatrices=()=>{
         matrixBox.appendChild(newMatrixTable);
     }
     matrixCalculator();
+    document.getElementById('matrix-calculator-operations').classList.remove('inputs-container-hidden');
+
 }
 
 
@@ -183,27 +189,28 @@ let matrixCalculator=()=>{
 }
 
 let extractCalculation=(formula)=>{
-    let matrixOne = matrixHolder[formula.charAt(0)];
+    let matrixOne = matrixHolder[ALPHABET.indexOf(formula.charAt(0).toLowerCase())];
     let matrixTwo;
     if(formula.charAt(2)){
-        matrixTwo = matrixHolder[formula.charAt(2)];
+        matrixTwo = matrixHolder[ALPHABET.indexOf(formula.charAt(2).toLowerCase())];
     }
     let operator  = formula.charAt(1);
 
     if(operator==='+'){
-        addMatrices(matrixOne, matrixTwo, 'Matrix (' + formula.charAt(0) + '+' + formula.charAt(2) + ")");
+        addMatrices(matrixOne, matrixTwo, 'MATRIX(' + formula.charAt(0) + '+' + formula.charAt(2) + ")");
     }else if(operator === '-'){
-        subtractMatrices(matrixOne, matrixTwo, 'Matrix ('+formula.charAt(0) + '-' + formula.charAt(2)+")");
+        subtractMatrices(matrixOne, matrixTwo, 'MATRIX('+formula.charAt(0) + '-' + formula.charAt(2)+")");
     }else if(operator==='*'){
-        multiplyMatrices(matrixOne, matrixTwo, 'Matrix (' + formula.charAt(0) + '' + formula.charAt(2) + ")") ;
+        multiplyMatrices(matrixOne, matrixTwo, 'MATRIX(' + formula.charAt(0) + '' + formula.charAt(2) + ")") ;
     }else if(operator==='t'){
         transpose(matrixOne, "tr(" + formula.charAt(0)+")");
     }
 }
 
-let printMatrix = (mtx, text) => {
+let printMatrix = (mtx, mtxCount, text) => {
     // Loop through matrixes and print them to the screen 
-    newElement('h3', matrixContainer, {}, text)
+    let matrixBox = newElement('div', matrixContainer, { class: 'matrix-calculator-box' })
+    newElement('h3', matrixBox, {}, text+" "+ALPHABET.charAt(mtxCount).toUpperCase())
 
     let newMatrixTable = newElement('table', '', { class: 'matrix' })
 
@@ -218,7 +225,7 @@ let printMatrix = (mtx, text) => {
         // Append tr to table
         newMatrixTable.appendChild(rowContainer);
     }
-    matrixContainer.appendChild(newMatrixTable);
+    matrixBox.appendChild(newMatrixTable);
 }
     
 
@@ -237,8 +244,12 @@ let addMatrices=(mtx1,mtx2, text)=>{
             newMtx.push(rowArray);
         }
         console.log(newMtx);
-        printMatrix(newMtx,text)
+        // Add the matrix to be used later
+        matrixCount = parseInt(matrixCount)+1;
+        matrixHolder[matrixCount-1] = newMtx;
+        printMatrix(newMtx,matrixCount-1,text);
     }
+    console.log(matrixHolder)
 }
 
 let subtractMatrices = (mtx1, mtx2, text) => {
@@ -257,7 +268,11 @@ let subtractMatrices = (mtx1, mtx2, text) => {
             newMtx.push(rowArray);
         }
         console.log(newMtx);
-        printMatrix(newMtx,text)
+        // Add the matrix to be used later
+        matrixCount = parseInt(matrixCount) + 1;
+        matrixHolder[matrixCount - 1] = newMtx;
+        printMatrix(newMtx, matrixCount - 1, text);
+        
     }
 }
 
@@ -282,7 +297,10 @@ let multiplyMatrices = (mtx1, mtx2, text) => {
             newMtx.push(rowArray);
         }
         console.log(newMtx);
-        printMatrix(newMtx, text)
+        // Add the matrix to be used later
+        matrixCount = parseInt(matrixCount) + 1;
+        matrixHolder[matrixCount - 1] = newMtx;
+        printMatrix(newMtx, matrixCount - 1, text);
     }
 }
 
@@ -303,7 +321,10 @@ let transpose=(mtx,text)=>{
         }
     }
     console.log(newMtx)
-    printMatrix(newMtx,text)
+    // Add the matrix to be used later
+    matrixCount = parseInt(matrixCount) + 1;
+    matrixHolder[matrixCount - 1] = newMtx;
+    printMatrix(newMtx, matrixCount - 1, text);
 }
 
 let trace=(mtx)=>{

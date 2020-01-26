@@ -8,7 +8,10 @@ body{
     position: absolute;
     text-align: center;
     width: 100%;
-    font-size: 40px;
+    font-size: 4vw;
+}
+input{
+    text-align: center !important;
 }
 #matrix-selection-container{
     width: 100%;
@@ -21,7 +24,9 @@ body{
     display: none;
 }
 .inputs-container{
-    position: relative;
+
+    position: absolute;
+    top: 20vw;
     background-color: rgb(168, 170, 223);
     border: 4px solid rgb(74, 76, 154);
     padding: 40px;
@@ -59,14 +64,16 @@ body{
 }
 .matrix-container{
     margin: 0 auto;
-    width: 70px !important;
+    width: fit-content !important;
 }
 .matrix-container input{
+    text-align: center;
     margin: 5px;
 }
 /*************************** MATRIX CALCULATOR *********************************/
 #matrix-calculator-container{
-
+    position: absolute;
+    top: 20vw;
 }
 #show-matrices-container{
     display: flex;
@@ -77,13 +84,40 @@ body{
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 10px;
 }
 #matrix-calculator{
-    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    margin: 30px auto;
+
+}
+#matrix-calculator-operations{
+    margin: 10px 9vw;
+}
+#matrix-calculator-operations ul{
+    list-style: none;
+}
+.calculator-operation-header{
+    text-decoration: underline;
+    text-transform: uppercase;
+}
+.calculator-operation-header span{
+    text-transform: lowercase;
+}
+.matrix input{
+    text-align: center;
 }
 .matrix {
-    width: 30px;
+    width: auto;
     position: relative;
+}
+.matrix tr{
+   display: flex;
+   justify-content: center;
+}
+.matrix td{
+   margin: 1px 3px;
 }
 .matrix:before, .matrix:after {
     content: "";
