@@ -349,9 +349,11 @@ let trace=(mtx)=>{
 
 /****************************** GAUSSIAN CALCULATOR ****************************/
 let rowOperatedMatrix = []; // Array to save the matrices which have had row operations performed, as well as the operation
+let operationCount = 1;
+
 
 let gaussianCalculator=(mtx)=>{
-    rowOperatedMatrix.push({original:mtx})
+    rowOperatedMatrix.push({matrix:mtx, operation:''}); // Push the original matrix
     createGaussianCalculator(mtx);
 }
 
@@ -387,23 +389,74 @@ let createGaussianCalculator=(mtx)=>{
     doneButton.addEventListener('click',()=>{
         // When user done performing row operations, submit the matrix to the holder
         // remove the gauss-calculator and show the matrix-calculator again
+        // Also, show which operations were performed to get this matrix when print it to screen
+
         // Get the container for the calculation input
         let gaussCalculatorContainer = document.getElementById('gaussian-calculator');
-        gaussCalculatorContainer.classList.add('inputs-container-hidden');
+        gaussCalculatorContainer.innerHTML ='';
 
         // Add the matrixCalculator from the DOM
         let matrixCalculatorContainer = document.getElementById('matrix-calculator');
         matrixCalculatorContainer.classList.remove('inputs-container-hidden');
 
-        // matrixCalculator();
+        /******* Print the matrix */
+
+        // Create text form matrix
+        let text = '';
+        rowOperatedMatrix.forEach((obj,index) => { if(index>0) text+=('<br>'+(index)+'. '+obj.operation)  });
+       
+   
+        matrixCount = parseInt(matrixCount) + 1; // Increment the matrix count
+
+        // Add to matrix holder
+        matrixHolder[matrixCount - 1] = rowOperatedMatrix[operationCount - 1]['matrix'];
+
+        // Print
+        printMatrix(matrixContainer, rowOperatedMatrix[operationCount-1]['matrix'], matrixCount-1, 
+            text) // Print the final matrix, which matrix its defined from and what operations performed
+        // Clear the operations
+        rowOperatedMatrix = []; // Array to save the matrices which have had row operations performed, as well as the operation
+        operationCount = 1;
 
     })
 }
 
 let extractRowOperation=(operation)=>{
     // Operation should be in the form 'R1=R1+R2'
-    console.log(operation);
+    let operationArray = operation.split('='); // Split array into R1, R1+R2
+    let rowToOperateOn = operationArray[0].match(/\d/)-1; // The row will be one less than written
+    let newOperation = operationArray[1];
+    // Take the current matrix form and perform the next operation
+    let currentMatrix = rowOperatedMatrix[operationCount-1]['matrix'];
+    
+    let newMatrix = [...currentMatrix]; // Create variable for new matrix
 
+    if(newOperation.includes('+')){
+        // Perform addition to the rows
+        console.log('Adding');
+        // Extract the row value, one less than whats written
+        let rowToAdd = (newOperation.split('+')[1].match(/\d/)[0])-1;
+
+        // Add all the values to the current matrix
+        let newRow = newMatrix[rowToOperateOn].map((val,index)=>parseInt(val)+parseInt(newMatrix[rowToAdd][index]));
+        newMatrix[rowToOperateOn] = newRow;
+
+    } else if (newOperation.includes('-')) {
+        // Perform subtraction to the rows
+        console.log('Subtracting');
+        // Extract the row value, one less than whats written
+        let rowToSubtract = (newOperation.split('-')[1].match(/\d/)[0]) - 1;
+
+        // Add all the values to the current matrix
+        let newRow = newMatrix[rowToOperateOn].map((val, index) => parseInt(val) - parseInt(newMatrix[rowToSubtract][index]));
+        newMatrix[rowToOperateOn] = newRow;
+    }
+
+    // Push the new matrix to the matrix holder (containing all forms of the matrix and its operations)
+    rowOperatedMatrix.push({matrix:newMatrix,operation:operation})
+    operationCount+=1;
+    // console.log(operation);
+    console.log(rowOperatedMatrix);
 
 }
 
