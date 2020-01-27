@@ -430,49 +430,37 @@ let extractRowOperation=(operation)=>{
     let currentMatrix = rowOperatedMatrix[operationCount-1]['matrix'];
     
     let newMatrix = [...currentMatrix]; // Create variable for new matrix
-
-    if(newOperation.includes('+')){
-        // Perform addition to the rows
-        console.log('Adding');
-        // Extract the row value, one less than whats written
-        let rowToAdd = (newOperation.split('+')[1].match(/\d/)[0])-1;
-
-        // Add all the values to the current matrix
-        let newRow = newMatrix[rowToOperateOn].map((val,index)=>parseInt(val)+parseInt(newMatrix[rowToAdd][index]));
+    
+    
+    if (newOperation.includes('*') && newOperation.includes('+')) {
+        // Add a multiple of a row to another
+        // Split at the addition sign, then pass in 
+        let operationArray = newOperation.split('+');
+        let multipliedRow = operationArray[1].match(/\d/)[0];
+        // Multiply the row and save it to a variable
+        let rowMultiplied = rowMultiplication(newMatrix, multipliedRow-1, newOperation);
+        newMatrix[rowToOperateOn] = newMatrix[rowToOperateOn].map((val, index) => parseInt(val) + rowMultiplied[index])
+    } else if (newOperation.includes('*') && newOperation.includes('-')) {
+        // Subtract a multiple of a row to another
+        // Split at the subtraction sign, then pass in 
+        let operationArray = newOperation.split('-');
+        let multipliedRow = operationArray[1].match(/\d/)[0];
+        // Multiply the row and save it to a variable
+        let rowMultiplied = rowMultiplication(newMatrix, multipliedRow - 1, newOperation);
+        newMatrix[rowToOperateOn] = newMatrix[rowToOperateOn].map((val, index) => parseInt(val) - rowMultiplied[index])
+    } else if(newOperation.includes('+')){
+        let newRow = rowAddition(newMatrix, rowToOperateOn, newOperation);
         newMatrix[rowToOperateOn] = newRow;
-
     } else if (newOperation.includes('-')) {
-        // Perform subtraction to the rows
-        console.log('Subtracting');
-        // Extract the row value, one less than whats written
-        let rowToSubtract = (newOperation.split('-')[1].match(/\d/)[0]) - 1;
-
-        // Add all the values to the current matrix
-        let newRow = newMatrix[rowToOperateOn].map((val, index) => parseInt(val) - parseInt(newMatrix[rowToSubtract][index]));
+        let newRow = rowSubtraction(newMatrix, rowToOperateOn, newOperation);
         newMatrix[rowToOperateOn] = newRow;
     } else if (newOperation.includes('/')) {
-        // Perform division to the row values
-        console.log('Division');
-        // Extract the row value, one less than whats written
-        let operationArray = newOperation.split('/');
-        let rowToDivide = (operationArray[0].match(/\d/)[0]);
-        let divisionInteger = parseInt(operationArray[1])
-
-        // Divide the values in selected row all the values to the current matrix
-        let newRow = newMatrix[rowToOperateOn].map((val, index) => parseInt(val)/divisionInteger);
+        let newRow = rowDivision(newMatrix, rowToOperateOn, newOperation);
         newMatrix[rowToOperateOn] = newRow;
-    } else if (newOperation.includes('*')) {
-        // Perform multiplication to the row values
-        console.log('Multiplication');
-        // Extract the row value, one less than whats written
-        let operationArray = newOperation.split('*');
-        let rowToMultiply = (operationArray[0].match(/\d/)[0]);
-        let multipleInteger = parseInt(operationArray[1])
-
-        // Divide the values in selected row all the values to the current matrix
-        let newRow = newMatrix[rowToOperateOn].map((val, index) => parseInt(val) * multipleInteger);
+    } else if (newOperation.includes('*')) { 
+        let newRow = rowMultiplication(newMatrix, rowToOperateOn, newOperation);
         newMatrix[rowToOperateOn] = newRow;
-    }
+    } 
 
     // Push the new matrix to the matrix holder (containing all forms of the matrix and its operations)
     rowOperatedMatrix.push({matrix:newMatrix,operation:operation})
@@ -482,6 +470,46 @@ let extractRowOperation=(operation)=>{
 
 }
 
+let rowAddition = (newMatrix, rowToOperateOn, newOperation)=>{
+    // Perform addition to the rows
+    console.log('Adding');
+    // Extract the row value, one less than whats written
+    let rowToAdd = (newOperation.split('+')[1].match(/\d/)[0]) - 1;
+
+    // Add all the values to the current matrix
+    return newMatrix[rowToOperateOn].map((val, index) => parseInt(val) + parseInt(newMatrix[rowToAdd][index]));
+
+}
+let rowMultiplication=(newMatrix, rowToOperateOn,newOperation)=>{
+    // Perform multiplication to the row values
+    console.log('Multiplication');
+    // Extract the row value, one less than whats written
+    let operationArray = newOperation.split('*');
+    let multipleInteger = parseInt(operationArray[1])
+
+    // Divide the values in selected row all the values to the current matrix
+    return newMatrix[rowToOperateOn].map((val, index) => parseInt(val) * multipleInteger);
+}
+let rowSubtraction = (newMatrix, rowToOperateOn, newOperation) => {
+    // Perform subtraction to the rows
+    console.log('Subtracting');
+    // Extract the row value, one less than whats written
+    let rowToSubtract = (newOperation.split('-')[1].match(/\d/)[0]) - 1;
+
+    // Add all the values to the current matrix
+    return newMatrix[rowToOperateOn].map((val, index) => parseInt(val) - parseInt(newMatrix[rowToSubtract][index]));
+}
+
+let rowDivision = (newMatrix, rowToOperateOn, newOperation)=>{
+    // Perform division to the row values
+    console.log('Division');
+    // Extract the row value, one less than whats written
+    let operationArray = newOperation.split('/');
+    let divisionInteger = parseInt(operationArray[1])
+
+    // Divide the values in selected row all the values to the current matrix
+    return newMatrix[rowToOperateOn].map((val, index) => parseInt(val) / divisionInteger);
+}
 
 
 
