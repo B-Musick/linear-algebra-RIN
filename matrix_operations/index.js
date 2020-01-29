@@ -347,7 +347,12 @@ let trace=(mtx)=>{
 let rowOperatedMatrix = []; // Array to save the matrices which have had row operations performed, as well as the operation
 let operationCount = 1;
 
+// Identity matrix operations
+let identityOperationMatrix = [];
+
+
 let gaussianCalculator=(mtx)=>{
+    // Called in extractCalculation() when 'matrixletterR' is typed into the input
     rowOperatedMatrix.push({matrix:mtx, operation:''}); // Push the original matrix
     createGaussianCalculator(mtx);
 }
@@ -372,8 +377,24 @@ let createGaussianCalculator=(mtx)=>{
     let operationSubmit = newElement('input', rowOpContainer, { id: 'row-operation-submit', type: 'submit', value: 'SUBMIT' });
 
     // Create button for user to click when done and wants to submit the matrix
-    let doneButton = newElement('input', gaussCalculatorContainer, { id: 'gaussian-matrix-submit', type: 'submit', value: 'DONE' })
+    let showElementaryMatricesButton = newElement('input', gaussCalculatorContainer, { id: 'elementary-matrix-show-button', type: 'submit', value: 'SHOW ELEMENTARY MATRICES' });
+    // newElement('br', gaussCalculatorContainer, {});
 
+    let showIdentityMatricesButton = newElement('input', gaussCalculatorContainer, { id: 'identity-matrix-show-button', type: 'submit', value: 'SHOW IDENTITY MATRICES' });
+
+    // Create button for user to click when done and wants to submit the matrix
+    let doneButton = newElement('input', gaussCalculatorContainer, { id: 'gaussian-matrix-submit', type: 'submit', value: 'DONE' })
+    
+    identityOperationMatrix.push({ matrix:getElementaryMatrix(mtx.length,mtx[0].length), operation: '' });
+
+    showElementaryMatricesButton.addEventListener('click',()=>{
+        let container = document.querySelectorAll('.elementary-matrix-container');
+        container.forEach(ele => ele.classList.toggle('matrix-container-hidden'));
+    })
+    showIdentityMatricesButton.addEventListener('click', () => {
+        let container = document.querySelectorAll('.identity-matrix-container');
+        container.forEach(ele => ele.classList.toggle('matrix-container-hidden'));
+    })
     operationSubmit.addEventListener('click', () => {
         // When user clicks the submit button to perform row operation on the matrix
         let operation = operationInput.value;
@@ -425,11 +446,15 @@ let extractRowOperation=(operation)=>{
     let currentMatrix = rowOperatedMatrix[operationCount-1]['matrix'];
     
     let newMatrix = [...currentMatrix]; // Create variable for new matrix
+    
     // Get elementary matrix matching the size of this one
     let rowSize = newMatrix.length;
     let columnSize = newMatrix[0].length;
     let elementaryMatrix = getElementaryMatrix(rowSize,columnSize);
-   
+
+    // Current identity matrix
+    let identityMatrix = [...identityOperationMatrix[operationCount-1]['matrix']];
+
     if (newOperation.includes('*') && newOperation.includes('+')) {
         addOrSubtractMultipleOfRow(newMatrix, rowToOperateOn, newOperation,'+');
         addOrSubtractMultipleOfRow(elementaryMatrix, rowToOperateOn, newOperation, '+');
@@ -439,6 +464,7 @@ let extractRowOperation=(operation)=>{
     } else if(newOperation.includes('+')){
         rowOperation(newMatrix, rowToOperateOn, newOperation, '+');
         rowOperation(elementaryMatrix,rowToOperateOn,newOperation,'+');
+        rowOperation(identityMatrix,rowToOperateOn,newOperation,'+');
     } else if (newOperation.includes('-')) {
         rowOperation(newMatrix, rowToOperateOn, newOperation,'-');
         rowOperation(elementaryMatrix,rowToOperateOn,newOperation,'-');
@@ -452,6 +478,7 @@ let extractRowOperation=(operation)=>{
     let gaussCalculatorContainer = document.getElementById('gaussian-calculator');
     // Push the new matrix to the matrix holder (containing all forms of the matrix and its operations)
     rowOperatedMatrix.push({matrix:newMatrix,operation:operation})
+    identityOperationMatrix.push({matrix:identityMatrix,operation:operation});
 
     // Print the current operated matrix to the screen
     printMatrix(gaussCalculatorContainer, newMatrix, operationCount - 1, operation);
@@ -459,6 +486,10 @@ let extractRowOperation=(operation)=>{
     // Print the elementary matrix as well with its row operation
     let elementaryText = 'E<sub>' + (operationCount - 1) + '</sub>';
     printMatrix(gaussCalculatorContainer, elementaryMatrix, operationCount - 1, operation, 'elementary-matrix-container',elementaryText);
+
+    // Print identity matrix operated on to screen, used to get inverse of matrix
+    let identityText = 'I -> ' + operation;
+    printMatrix(gaussCalculatorContainer, identityMatrix, operationCount - 1, operation, 'identity-matrix-container',identityText);
 
     // Increment to keep track the amount of operations performed
     operationCount+=1;
@@ -476,6 +507,7 @@ let getElementaryMatrix=(rowSize, columnSize)=>{
     return matrix;
 }
 
+/****************** ROW OPERATIONS *******************/
 let addOrSubtractMultipleOfRow = (newMatrix, rowToOperateOn, newOperation,operation)=>{
     // Subtract/ add(depending on operation) a multiple of a row to another. Split at the operation sign, then pass in 
     let operationArray = newOperation.split(operation);
@@ -520,4 +552,8 @@ let rowOperation = (newMatrix, rowToOperateOn, newOperation, operation)=>{
 
 
 
+// How to fill matrix with values
+// https://flaviocopes.com/how-to-initialize-array-with-values/ 
 
+            // Create array with rowCount x colCount, add it to matrixHolder with associated matrix number
+            // https://stackoverflow.com/questions/16512182/how-to-create-empty-2d-array-in-javascript
